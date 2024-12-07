@@ -62,12 +62,9 @@ struct LyricsOverlay: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .onReceive(lyricsPublisher) { newLyrics in
-                let lyrics = newLyrics.map {
+                lyrics = newLyrics.map {
                     $0.trimmingCharacters(in: .whitespacesAndNewlines)
                 }
-                let lastEmpty = lyrics.lastIndex { $0.isEmpty } ?? lyrics.count
-                
-                self.lyrics = Array(lyrics.prefix(lastEmpty))
             }
             .onReceive(currentPublisher) { newCurrent in
                 withAnimation(.easeInOut(duration: 0.5)) {
