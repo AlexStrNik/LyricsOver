@@ -80,7 +80,7 @@ func calculateCurrentLyrics(refcon: UnsafeMutableRawPointer) {
     for (offset, child) in children.enumerated() {
         let childY = child.frame.minY - lyricsScroll.frame.minY
         
-        if childY > 0 {
+        if childY > 50 {
             DispatchQueue.main.async {
                 lyricsApp.currentSubject.send(offset)
             }

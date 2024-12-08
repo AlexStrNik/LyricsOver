@@ -58,7 +58,7 @@ struct LyricsOverlay: View {
                         .id(offset)
                     }
                 }
-                .padding(.vertical, 16)
+                .padding(16)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .onReceive(lyricsPublisher) { newLyrics in
@@ -67,9 +67,11 @@ struct LyricsOverlay: View {
                 }
             }
             .onReceive(currentPublisher) { newCurrent in
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    scrollView.scrollTo(newCurrent, anchor: .init(x: 0, y: 0.2))
-                    current = newCurrent
+                if current != newCurrent {
+                    withAnimation(.easeInOut(duration: 0.7)) {
+                        scrollView.scrollTo(newCurrent, anchor: .init(x: 0, y: 0.2))
+                        current = newCurrent
+                    }
                 }
             }
         }
