@@ -67,6 +67,10 @@ struct LyricsOverlay: View {
                 lyrics = newLyrics.map {
                     $0.trimmingCharacters(in: .whitespacesAndNewlines)
                 }
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    scrollView.scrollTo(0, anchor: .init(x: 0, y: 0.2))
+                    current = 0
+                }
             }
             .onReceive(currentPublisher) { newCurrent in
                 if current != newCurrent {

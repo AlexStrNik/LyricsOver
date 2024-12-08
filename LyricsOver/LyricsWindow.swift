@@ -45,7 +45,7 @@ class LyricsWindow: NSPanel {
         self.isOpaque = false
         self.isMovableByWindowBackground = true
         self.hasShadow = false
-        self.level = NSWindow.Level(Int(CGShieldingWindowLevel()))
+        self.level = NSWindow.Level(Int(NSWindow.Level.floating.rawValue + 1))
         self.backgroundColor = .clear
         self.ignoresMouseEvents = true
         

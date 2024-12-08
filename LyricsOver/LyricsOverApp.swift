@@ -119,7 +119,7 @@ class LyricsOverApp: NSObject, NSApplicationDelegate {
         requestAccesibility()
         
         lyricsWindow = LyricsWindow(
-            rect: CGRect(x: 100, y: 100, width: 400, height: 150)
+            rect: CGRect(x: 100, y: 100, width: 300, height: 150)
         )
         lyricsWindow?.contentView = NSHostingView(
             rootView: LyricsOverlay(
@@ -169,6 +169,13 @@ class LyricsOverApp: NSObject, NSApplicationDelegate {
         guard let lyricsWindow else { return }
         
         lyricsWindow.ignoresMouseEvents.toggle()
+        lyricsWindow.backgroundColor = lyricsWindow.ignoresMouseEvents ? .clear : .red.withAlphaComponent(0.5)
+        if !lyricsWindow.ignoresMouseEvents {
+            lyricsWindow.styleMask.update(with: .resizable)
+        } else {
+            lyricsWindow.styleMask.remove(.resizable)
+        }
+        
         toggleMenuItem.state = lyricsWindow.ignoresMouseEvents ? .off : .on
     }
         
