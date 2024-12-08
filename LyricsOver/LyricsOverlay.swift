@@ -26,7 +26,6 @@ struct WaitForLyrics: View {
                 .opacity(shouldAnimate ? 1.0 : 0.5)
                 .animation(.easeInOut(duration: 0.6).repeatForever().delay(0.4), value: shouldAnimate)
         }
-//        .frame(height: 32, alignment: .leading)
         .onAppear {
             shouldAnimate = true
         }
@@ -47,7 +46,9 @@ struct LyricsOverlay: View {
                     ForEach(Array(lyrics.enumerated()), id: \.offset) { offset, lyric in
                         Group {
                             if lyric.isEmpty {
-                                WaitForLyrics()
+                                if offset == current {
+                                    WaitForLyrics()
+                                }
                             } else {
                                 Text(lyric)
                                     .font(.largeTitle.weight(.bold))
@@ -58,6 +59,7 @@ struct LyricsOverlay: View {
                         .id(offset)
                     }
                 }
+                .padding(.bottom, 128)
                 .padding(16)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -68,7 +70,7 @@ struct LyricsOverlay: View {
             }
             .onReceive(currentPublisher) { newCurrent in
                 if current != newCurrent {
-                    withAnimation(.easeInOut(duration: 0.7)) {
+                    withAnimation(.easeInOut(duration: 0.5)) {
                         scrollView.scrollTo(newCurrent, anchor: .init(x: 0, y: 0.2))
                         current = newCurrent
                     }

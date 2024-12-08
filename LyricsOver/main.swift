@@ -14,4 +14,6 @@ let delegate = LyricsOverApp()
 app.delegate = delegate
 app.setActivationPolicy(.accessory)
 
+NSClipView.setAnimationDuration()
+
 _ = NSApplicationMain(CommandLine.argc, CommandLine.unsafeArgv)

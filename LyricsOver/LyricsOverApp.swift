@@ -59,10 +59,12 @@ func observeLyrics(
         return
     }
     
+    let lyrics = children.map { $0.title ?? "" }.reversed().drop(while: \.isEmpty).reversed()
+    
     DispatchQueue.main.async {
-        lyricsApp.lyricsSubject.send(children.map {
-            $0.title ?? ""
-        })
+        lyricsApp.lyricsSubject.send(
+            Array(lyrics)
+        )
     }
     
     calculateCurrentLyrics(refcon: refcon)
