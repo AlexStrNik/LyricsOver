@@ -46,9 +46,7 @@ struct LyricsOverlay: View {
                     ForEach(Array(lyrics.enumerated()), id: \.offset) { offset, lyric in
                         Group {
                             if lyric.isEmpty {
-                                if offset == current {
-                                    WaitForLyrics()
-                                }
+                                WaitForLyrics()
                             } else {
                                 Text(lyric)
                                     .font(.largeTitle.weight(.bold))
