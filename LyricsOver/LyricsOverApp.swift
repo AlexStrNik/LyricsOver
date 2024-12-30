@@ -133,36 +133,44 @@ class LyricsOverApp: NSObject, NSApplicationDelegate {
             \.runningApplications,
              options: [.initial]
         ) { (model, change) in
-            guard let musicApp = NSWorkspace.shared.runningApplications.first (where: {
-                $0.bundleIdentifier == "com.apple.Music"
-            }) else {
-                self.musicApp = nil
-                return
-            }
-            
-            if self.musicApp == nil {
-                self.musicApp = musicApp
-                self.connectToAppleMusic(app: musicApp)
-            }
+            self.observeApplications()
         }
         
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         let statusButton = statusBarItem!.button
-        statusButton!.image = NSImage(systemSymbolName: "quote.bubble", accessibilityDescription: "AppBulbs")
+        statusButton!.image = NSImage(systemSymbolName: "quote.bubble", accessibilityDescription: "LyricsOver")
         
         toggleMenuItem = NSMenuItem(title: "Movable", action: #selector(toggle), keyEquivalent: "")
-        toggleMenuItem.onStateImage = NSImage(systemSymbolName: "checkmark", accessibilityDescription: "AppBulbs")
+        toggleMenuItem.onStateImage = NSImage(systemSymbolName: "checkmark", accessibilityDescription: "LyricsOver")
         toggleMenuItem.state = .off
 
         let quit = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "")
+        
+        let restart = NSMenuItem(title: "Restart", action: #selector(restartApp), keyEquivalent: "")
         
         statusMenu = NSMenu()
         
         statusMenu!.addItem(toggleMenuItem)
         statusMenu!.addItem(.separator())
+        statusMenu!.addItem(restart)
         statusMenu!.addItem(quit)
         
         statusBarItem!.menu = statusMenu!
+    }
+    
+    func observeApplications() {
+        guard let musicApp = NSWorkspace.shared.runningApplications.first (where: {
+            $0.bundleIdentifier == "com.apple.Music"
+        }) else {
+            self.musicApp = nil
+            self.lyricsObserver = nil
+            return
+        }
+        
+        if self.musicApp == nil {
+            self.musicApp = musicApp
+            self.connectToAppleMusic(app: musicApp)
+        }
     }
     
     @objc func toggle() {
@@ -181,6 +189,12 @@ class LyricsOverApp: NSObject, NSApplicationDelegate {
         
     @objc func quitApp() {
         NSApplication.shared.terminate(nil)
+    }
+    
+    @objc func restartApp() {
+        self.musicApp = nil
+        self.lyricsObserver = nil
+        observeApplications()
     }
     
     func requestAccesibility() {
@@ -205,7 +219,9 @@ class LyricsOverApp: NSObject, NSApplicationDelegate {
             return
         }
         
-        let lyricsGroup = splitGroup.children?.first { $0.role == kAXGroupRole && $0.description == "Lyrics" }
+        let lyricsGroupDescription = getLyricsDescription(prefferedLanguage: appElement.prefferedLanguage ?? "en")
+        
+        let lyricsGroup = splitGroup.children?.first { $0.role == kAXGroupRole && $0.description == lyricsGroupDescription }
         guard let lyricsGroup else {
             return
         }
@@ -234,79 +250,15 @@ class LyricsOverApp: NSObject, NSApplicationDelegate {
             refcon: refcon
         )
     }
-}
-
-extension AXUIElement {
-    func attribute(_ attribute: String) -> AnyObject? {
-        var attributeValue: AnyObject?
-        AXUIElementCopyAttributeValue(
-            self,
-            attribute as CFString,
-            &attributeValue
-        )
-        
-        return attributeValue
-    }
     
-    var attributes: [String: AnyObject] {
-        var attributes: CFArray?
-        AXUIElementCopyAttributeNames(self, &attributes)
+    func getLyricsDescription(prefferedLanguage: String) -> String {
+        let musicApp = URL(fileURLWithPath: "/System/Applications/Music.app")
+        let musicBundle = Bundle(url: musicApp)?.path(forResource: prefferedLanguage, ofType: "lproj")
         
-        guard let attributes else {
-            return [:]
+        guard let musicBundle else {
+            return "Lyrics"
         }
         
-        return (attributes as! [String]).reduce(into: [:]) { result, attribute in
-            let value = self.attribute(attribute)
-            result[attribute as String] = value
-        }
-    }
-    
-    var description: String? {
-        return attribute(kAXDescription) as? String
-    }
-    
-    var title: String? {
-        return attribute(kAXTitleAttribute) as? String
-    }
-    
-    var role: String {
-        return attribute(kAXRoleAttribute) as! String
-    }
-    
-    var frame: CGRect {
-        var frameValue: CFTypeRef?
-        AXUIElementCopyAttributeValue(
-            self,
-            "AXFrame" as CFString,
-            &frameValue
-        )
-        
-        var frame = CGRect.zero
-        
-        guard let frameValue else {
-            return frame
-        }
-        
-        AXValueGetValue(
-            frameValue as! AXValue,
-            AXValueType.cgRect,
-            &frame
-        )
-        
-        return frame
-    }
-    
-    var children: [AXUIElement]? {
-        var count: CFIndex = 0
-        var result = AXUIElementGetAttributeValueCount(self, kAXChildrenAttribute as CFString, &count)
-        
-        var children: CFArray?
-        result = AXUIElementCopyAttributeValues(self, kAXChildrenAttribute as CFString, 0, count, &children)
-        if result != .success {
-            return nil
-        }
-        
-        return children as? [AXUIElement]
+        return NSLocalizedString("xmft2x35ce", bundle: Bundle(path: musicBundle)!, comment: "")
     }
 }
